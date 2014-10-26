@@ -1,0 +1,118 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Daemon.buildAround(&hellip;)</title>
+<script type="text/javascript" src="daemon.js"></script>
+<script type="text/javascript" src="daemon-methods.js"></script>
+<script type="text/javascript">
+
+/*\
+|*|
+|*|  :: Daemon.buildAround(@context[, @rate, @length]) ::
+|*|
+|*|  Returns a new daemon built around a @context object. The @context object must contain *at least*
+|*|  a "perform" property pointing to what you want to be the @callback function of the daemon.
+|*|  It can also optionally contain "create" and "prepare" properties pointing respectively to the
+|*|  two functions you want to be the @init and @onstart functions of Daemon constructor's arguments.
+|*|  The @context object will be also the *this* object of your callback function. So you can populate
+|*|  it with any custom properties and methods. The only required one property is "perform".
+|*|
+|*|  Sample usage:
+|*|
+|*|  	var myDaemon = Daemon.buildAround({
+|*|  		"customProperty": [custom value],
+|*|  		"myCustomMethod": function () { [custom code] },
+|*|  		"anotherCustomProperty": [custom value],
+|*|  		"etc.": "etc."
+|*|  		"create": function () { [custom code] },	// optional
+|*|  		"prepare": function () { [custom code] },	// optional
+|*|  		"perform": function () { [custom code] },	// required
+|*|  	}, 200, 30);
+|*|
+\*/
+
+var sText = "Do you feel lucky, punk?", oUnhide = Daemon.buildAround({
+	// http://tyleregeto.com/text-animation-in-javascript
+	"letters": [],
+	"numletters": 0,
+	"clock": 0,
+	"interval": 0.0,
+	"delta": 33,
+	"letters": [],
+	"pool": ["0","1","2","3","4","5","6","7","8","9"],
+	"target": document.createElement("p"),
+	"create": function () {
+		// build letters list
+		this.target.textContent = "";
+		this.letters.length = 0;
+		for (var oSpan, oLetter, nLetter = 0, nLen = sText.length; nLetter < nLen; nLetter++) {
+			oSpan = document.createElement("span");
+			oSpan.textContent = sText[nLetter];
+			oLetter = { "elem": oSpan, "parent": this.target };
+			this.letters.push(oLetter);
+			oLetter.index = this.numletters;
+			oLetter.elem.style.position = "relative";
+			oLetter.val = oLetter.elem.textContent;
+			this.numletters++;
+			this.target.appendChild(oSpan);
+		}
+	},
+	"perform": function (nIndex, nLength, bBackw) {
+		for (var oLetter, nLetter = 0; nLetter < this.letters.length; nLetter++) {
+			oLetter = this.letters[nLetter];
+			if (nLength < nIndex && this.clock + this.delta < this.interval) {
+				clock += this.delta;
+				return;
+			}
+			this.clock = 0;
+			oLetter.elem.textContent = nIndex / nLength - oLetter.index / this.numletters >= 0 ?
+				oLetter.val
+				: this.pool[parseInt(Math.random() * this.pool.length)];
+		}
+	}
+}, 33, 30);
+
+onload = function () {
+	oUnhide.owner.target.id = "animate-me";
+	document.body.appendChild(oUnhide.owner.target);
+	oUnhide.play();
+};
+
+</script>
+
+<style type="text/css">
+body {
+	font-family: monospace, sans-serif;
+	background: #DDDDDD;
+	overflow: hidden;
+}
+
+#animate-me {
+	margin: 50px;
+	font-size: 20px;
+	line-height: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Daemon.buildAround()</h1>
+
+<p><button onclick="oUnhide.skipTo(11);">skipTo(11)</button>
+<button onclick="oUnhide.makeSteps(29);">makeSteps(29)</button>
+<button onclick="oUnhide.fixPosition(-13);">fixPosition(-13)</button>
+<button onclick="oUnhide.play();">play</button>
+<button onclick="oUnhide.turn();">turn</button>
+<button onclick="oUnhide.pause();">pause</button>
+<button onclick="oUnhide.reversePlay();">reversePlay</button>
+<button onclick="oUnhide.reversals = 2;alert('changed');">two reversals</button>
+<button onclick="oUnhide.makeLoop();alert('changed');">makeLoop</button>
+<button onclick="oUnhide.unmakeLoop();alert('changed');">unmakeLoop</button>
+<button onclick="oUnhide.close();">close</button>
+<button onclick="oUnhide.reclose();">reclose</button><br />
+frame rate: <input type="text" id="vello" value="33" style="width: 40px;" onkeypress="return event.charCode===0||/\d/.test(String.fromCharCode(event.charCode));" onkeyup="if(isFinite(this.value)&&Number(this.value)>0){oUnhide.setRate(this.value);}" /></p>
+
+</body>
+</html>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>new Daemon.safe(&hellip;)</title>
+<script type="text/javascript" src="daemon.js"></script>
+<script type="text/javascript" src="daemon-safe.js"></script>
+<script type="text/javascript" src="daemon-methods.js"></script>
+<script type="text/javascript">
+
+function perform (nIndex, nLength, bBackw) {
+	// http://tyleregeto.com/text-animation-in-javascript
+	for (var oLetter, nLetter = 0; nLetter < aLetters.length; nLetter++) {
+		oLetter = aLetters[nLetter];
+		var nDist = nMaxDist - nMaxDist * nIndex / nLength;
+		oLetter.pos += 0.08;
+		oLetter.elem.style.top = Math.sin(oLetter.pos) * nDist + "px";
+		oLetter.elem.style.left = Math.cos(oLetter.pos) * nDist * 5 + "px";
+	}
+}
+
+function prepare () {
+	// build letters list
+	// http://tyleregeto.com/text-animation-in-javascript
+	this.textContent = "";
+	aLetters.length = 0;	
+	for (var oSpan, oLetter, nLetter = 0, nLen = sText.length; nLetter < nLen; nLetter++) {
+		oSpan = document.createElement("span");
+		oSpan.textContent = sText[nLetter];
+		oLetter = { "elem": oSpan, "parent": this };
+		aLetters.push(oLetter);
+		oLetter.pos = Math.random() * 50;
+		oLetter.elem.style.position = "relative";
+		this.appendChild(oSpan);
+	}
+}
+
+var
+	nMaxDist = 25, aLetters = [], sText = "Do you feel lucky, punk?",
+	oRecompose = new Daemon.safe(document.createElement("p"), perform, 33, 30, prepare);
+
+onload = function () {
+	oRecompose.owner.id = "perform-me";
+	document.body.appendChild(oRecompose.owner);
+	oRecompose.play();
+};
+
+</script>
+
+<style type="text/css">
+body {
+	font-family: monospace, sans-serif;
+	background: #DDDDDD;
+	overflow: hidden;
+}
+
+#perform-me {
+	margin: 50px;
+	font-size: 20px;
+	line-height: 20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>new Daemon.safe(<em>@thisObject</em>, <em>@callback</em>[, <em>@rate</em>, <em>@length</em>, <em>@init</em>, <em>@onstart</em>])</h1>
+
+<p><button onclick="oRecompose.skipTo(11);">skipTo(11)</button>
+<button onclick="oRecompose.makeSteps(29);">makeSteps(29)</button>
+<button onclick="oRecompose.fixPosition(-13);">fixPosition(-13)</button>
+<button onclick="oRecompose.play();">play</button>
+<button onclick="oRecompose.turn();">turn</button>
+<button onclick="oRecompose.pause();">pause</button>
+<button onclick="oRecompose.reversePlay();">reversePlay</button>
+<button onclick="oRecompose.reversals = 2;alert('changed');">two reversals</button>
+<button onclick="oRecompose.makeLoop();alert('changed');">makeLoop</button>
+<button onclick="oRecompose.unmakeLoop();alert('changed');">unmakeLoop</button>
+<button onclick="oRecompose.close();">close</button>
+<button onclick="oRecompose.reclose();">reclose</button><br />
+frame rate: <input type="text" id="vello" value="33" style="width: 40px;" onkeypress="return event.charCode===0||/\d/.test(String.fromCharCode(event.charCode));" onkeyup="if(isFinite(this.value)&&Number(this.value)>0){oRecompose.setRate(this.value);}" /></p>
+
+</body>
+</html>
